@@ -109,4 +109,13 @@ class BalanceController extends Controller
                     ->route('balance.transfer')
                     ->with('error', $response['message']);
     }
+
+
+
+    public function historic()
+    {
+        $historics = auth()->user()->historics()->with(['userSender'])->get();
+
+        return view('admin.balance.historics', compact('historics'));
+    }
 }
