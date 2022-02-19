@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileFormRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -12,7 +13,6 @@ class UserController extends Controller
     {
         return view('site.profile.profile');
     }
-
 
     public function profileUpdate(UpdateProfileFormRequest $request)
     {
@@ -25,14 +25,14 @@ class UserController extends Controller
         else
             unset($data['password']);
 
-        
+
         $data['image'] = $user->image;
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             if ($user->image)
                 $name = $user->image;
             else
-                $name = $user->id.kebab_case($user->name);
-            
+                $name = $user->id . Str::of($user->name)->kebab();
+
             $extenstion = $request->image->extension();
             $nameFile = "{$name}.{$extenstion}";
 
@@ -42,19 +42,20 @@ class UserController extends Controller
 
             if (!$upload)
                 return redirect()
-                            ->back()
-                            ->with('error', 'Falha ao fazer o upload da imagem');
+                    ->back()
+                    ->with('error', 'Falha ao fazer o upload da imagem');
         }
 
         $update = $user->update($data);
 
-        if ($update)
+        if ($update) {
             return redirect()
-                        ->route('profile')
-                        ->with('success', 'Sucesso ao atualizar!');
-
-        return redirect()
-                    ->back()
-                    ->with('error', 'Falha ao atualizar o perfil...');
+                ->route('profile')
+                ->with('success', 'Sucesso ao atualizar!');
+        } else {
+            return redirect()
+                ->back()
+                ->with('error', 'Falha ao atualizar o perfil...');
+        }
     }
 }

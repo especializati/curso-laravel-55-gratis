@@ -1,1 +1,1 @@
-@extends('adminlte::passwords.reset')
+@extends('adminlte::auth.passwords.reset')

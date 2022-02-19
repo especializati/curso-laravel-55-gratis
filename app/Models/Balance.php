@@ -2,22 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use DB;
-use App\User;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class Balance extends Model
 {
-    // private $table = 'balance';
+    use HasFactory;
+
     public $timestamps = false;
 
-
-    public function deposit(float $value) : Array
+    public function deposit(float $value): array
     {
         DB::beginTransaction();
 
         $totalBefore = $this->amount ? $this->amount : 0;
-        $this->amount += number_format($value, 2, '.', '');
+        $this->amount += number_format($value, 2, ".", "");
         $deposit = $this->save();
 
         $historic = auth()->user()->historics()->create([
@@ -29,38 +30,33 @@ class Balance extends Model
         ]);
 
         if ($deposit && $historic) {
-
-            DB::commit();            
-
+            DB::commit();
             return [
                 'success' => true,
-                'message' => 'Sucesso ao recarregar'
+                'message' => 'Sucesso ao depositar'
             ];
         } else {
-
-            DB::rollback();
-
+            DB::rollBack();
             return [
                 'success' => false,
-                'message' => 'Falha ao carregar'
+                'message' => 'Falha ao depositar'
             ];
         }
     }
 
-
-    public function withdraw(float $value) : Array
+    public function withdraw(float $value): array
     {
-        if ($this->amount < $value)
+        if ($this->amount < $value) {
             return [
                 'success' => false,
-                'message' => 'Saldo insuficiênte',
+                'message' => 'Saldo insuficiente'
             ];
-
+        }
 
         DB::beginTransaction();
 
         $totalBefore = $this->amount ? $this->amount : 0;
-        $this->amount -= number_format($value, 2, '.', '');
+        $this->amount -= number_format($value, 2, ".", "");
         $withdraw = $this->save();
 
         $historic = auth()->user()->historics()->create([
@@ -72,36 +68,30 @@ class Balance extends Model
         ]);
 
         if ($withdraw && $historic) {
-
-            DB::commit();            
-
+            DB::commit();
             return [
                 'success' => true,
-                'message' => 'Sucesso ao retirar'
+                'message' => 'Sucesso ao sacar'
             ];
         } else {
-
-            DB::rollback();
-
+            DB::rollBack();
             return [
                 'success' => false,
-                'message' => 'Falha ao retirar'
+                'message' => 'Falha ao sacar'
             ];
         }
     }
 
-
-    public function transfer(float $value, User $sender): Array
+    public function transfer(float $value, User $sender): array
     {
-        if ($this->amount < $value)
+        if ($this->amount < $value) {
             return [
                 'success' => false,
-                'message' => 'Saldo insuficiênte',
+                'message' => 'Saldo insuficiente',
             ];
-
+        }
 
         DB::beginTransaction();
-
         /********************************************************
          * Atualiza o próprio saldo
          * *****************************************************/
@@ -117,8 +107,6 @@ class Balance extends Model
             'date'                  => date('Ymd'),
             'user_id_transaction'   => $sender->id
         ]);
-
-
         /********************************************************
          * Atualiza o saldo do recebedor
          * *****************************************************/
@@ -137,20 +125,17 @@ class Balance extends Model
         ]);
 
         if ($transfer && $historic && $transferSender && $historicSender) {
-
-            DB::commit();            
-
+            DB::commit();
             return [
                 'success' => true,
                 'message' => 'Sucesso ao transferir'
             ];
+        } else {
+            DB::rollback();
+            return [
+                'success' => false,
+                'message' => 'Falha ao retirar'
+            ];
         }
-
-        DB::rollback();
-
-        return [
-            'success' => false,
-            'message' => 'Falha ao retirar'
-        ];
     }
 }

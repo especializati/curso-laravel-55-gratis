@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 use Carbon\Carbon;
-use App\User;
 
 class Historic extends Model
 {
-    protected $fillable = ['type', 'amount', 'total_before', 'total_after', 'user_id_transaction', 'date'];
+    use HasFactory;
+    public $timestamps = false;
 
+    protected $fillable = ['type', 'amount', 'total_before', 'total_after', 'user_id_transaction', 'date'];
 
     public function type($type = null)
     {
         $types = [
-            'I' => 'Entrada',
+            'I' => 'Depósito',
             'O' => 'Saque',
             'T' => 'Transferência',
         ];
@@ -24,7 +27,7 @@ class Historic extends Model
 
         if ($this->user_id_transaction != null && $type == 'I')
             return 'Recebido';
-        
+
         return $types[$type];
     }
 
@@ -45,30 +48,26 @@ class Historic extends Model
         return $this->belongsTo(User::class, 'user_id_transaction');
     }
 
-
     public function getDateAttribute($value)
     {
         return Carbon::parse($value)->format('d/m/Y');
     }
 
-
-    public function search(Array $data, $totalPage)
+    public function search(array $data, $totalPage)
     {
         $historics = $this->where(function ($query) use ($data) {
-            if (isset($data['id']))
+            if (isset($data['id'])) {
                 $query->where('id', $data['id']);
-
-            if (isset($data['date']))
+            }
+            if (isset($data['date'])) {
                 $query->where('date', $data['date']);
-
-            if (isset($data['type']))
+            }
+            if (isset($data['type'])) {
                 $query->where('type', $data['type']);
-        })
-        // ->where('user_id', auth()->user()->id)
-        ->userAuth()
-        ->with(['userSender'])
-        ->paginate($totalPage);
-        //->toSql();dd($historics);
+            }
+        })->userAuth()
+            ->with(['userSender'])
+            ->paginate($totalPage);
 
         return $historics;
     }

@@ -1,35 +1,46 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'Transferir Saldo')
+@section('title', 'Nova Transferência')
 
 @section('content_header')
-    <h1>Transferir</h1>
-
+    <h1>Realizar Transferência</h1>
     <ol class="breadcrumb">
-        <li><a href="">Dashboard</a></li>
-        <li><a href="">Saldo</a></li>
-        <li><a href="">Transferir</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.home') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.balance') }}">Saldo</a></li>
+        <li class="breadcrumb-item"><a href="#">Transferência</a></li>
     </ol>
 @stop
 
 @section('content')
-    <div class="box">
-        <div class="box-header">
-            <h3>Transferir Saldo (Informe o Recebedor)</h3>
-        </div>
-        <div class="box-body">
-            @include('admin.includes.alerts')
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="col-12 d-flex flex-wrap px-0">
+                            <span class="text-info"><i class="fas fa-exchange-alt"></i>
+                                Transferir saldo (informe o recebedor)</span>
+                        </div>
+                    </div>
 
-            <form method="POST" action="{{ route('confirm.transfer') }}">
-                {!! csrf_field() !!}
+                    <div class="card-body">
+                        @include('admin.includes.alerts')
 
-                <div class="form-group">
-                    <input type="text" name="sender" placeholder="Informação de quem vai receber o saque (Nome ou E-mail)" class="form-control" required>
+                        <div class="col-12 col-md-4 px-0">
+                            <form method="POST" action="{{ route('confirm.transfer') }}">
+                                @csrf
+                                <div class="form-group">
+                                    <input type="text" name="sender" placeholder="Nome ou e-mail do recebedor"
+                                        class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-success">Próxima Etapa</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-success">Próxima Etapa</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
-@stop
+@endsection

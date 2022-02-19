@@ -1,27 +1,29 @@
 <?php
 
-$this->group(['middleware' => ['auth'], 'namespace' => 'Admin', 'prefix' => 'admin'], function(){
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\BalanceController;
+use App\Http\Controllers\Admin\UserController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Site\SiteController;
 
-    $this->any('historic-search', 'BalanceController@searchHistoric')->name('historic.search');
-    $this->get('historic', 'BalanceController@historic')->name('admin.historic');
-
-    $this->post('transfer', 'BalanceController@transferStore')->name('transfer.store');
-    $this->post('confirm-transfer', 'BalanceController@confirmTransfer')->name('confirm.transfer');
-    $this->get('transfer', 'BalanceController@transfer')->name('balance.transfer');
-
-    $this->post('withdraw', 'BalanceController@withdrawStore')->name('withdraw.store');
-    $this->get('withdraw', 'BalanceController@withdraw')->name('balance.withdraw');
-
-    $this->post('deposit', 'BalanceController@depositStore')->name('deposit.store');
-    $this->get('deposit', 'BalanceController@deposit')->name('balance.deposit');
-    $this->get('balance', 'BalanceController@index')->name('admin.balance');
-
-    $this->get('/', 'AdminController@index')->name('admin.home');
+Route::group(['middleware' => ['auth'], 'prefix' => 'admin'], function () {
+    Route::get('/', [AdminController::class, 'index'])->name('admin.home');
+    Route::get('balance', [BalanceController::class, 'index'])->name('admin.balance');
+    Route::get('deposit', [BalanceController::class, 'deposit'])->name('balance.deposit');
+    Route::post('deposit', [BalanceController::class, 'depositStore'])->name('deposit.store');
+    Route::get('withdraw', [BalanceController::class, 'withdraw'])->name('balance.withdraw');
+    Route::post('withdraw', [BalanceController::class, 'withdrawStore'])->name('withdraw.store');
+    Route::get('transfer', [BalanceController::class, 'transfer'])->name('balance.transfer');
+    Route::post('confirm-transfer', [BalanceController::class, 'confirmTransfer'])->name('confirm.transfer');
+    Route::post('transfer', [BalanceController::class, 'transferStore'])->name('transfer.store');
+    Route::get('historic', [BalanceController::class, 'historic'])->name('admin.historic');
+    Route::any('historic-search', [BalanceController::class, 'searchHistoric'])->name('historic.search');
 });
 
-$this->post('atualizar-perfil', 'Admin\UserController@profileUpdate')->name('profile.update')->middleware('auth');
-$this->get('meu-perfil', 'Admin\UserController@profile')->name('profile')->middleware('auth');
+Route::get('meu-perfil', [UserController::class, 'profile'])->name('profile')->middleware('auth');
+Route::post('atualizar-perfil', [UserController::class, 'profileUpdate'])->name('profile.update')->middleware('auth');
 
-$this->get('/', 'Site\SiteController@index')->name('home');
+Route::get('/', [SiteController::class, 'index'])->name('site.home');
 
 Auth::routes();
